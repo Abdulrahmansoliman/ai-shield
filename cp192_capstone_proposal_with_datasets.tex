@@ -1,0 +1,199 @@
+
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\setlength{\parskip}{0.6em}
+\setlength{\parindent}{0pt}
+\renewcommand{\arraystretch}{1.25}
+
+\begin{document}
+
+% =========================
+% Cover Sheet
+% =========================
+
+\begin{center}
+{\Large \textbf{CP192 Brief Capstone Proposal \& Completed Work Cover Sheet}}
+\end{center}
+
+\vspace{0.5em}
+
+\rowcolors{2}{gray!6}{white}
+\begin{tabularx}{\textwidth}{|X|}
+\hline
+\textbf{Name:} Abdelrahman Mohamed \\
+\hline
+\textbf{Major(s), concentration(s), and minor(s):} CS \\
+\hline
+\textbf{Capstone Seminar section:} Diamond, Th@7:00PM UTC \\
+\hline
+\textbf{Have you filled out the advisor/track matching survey?} (Your answer must be ``\textbf{yes}'' and that needs to be true!) \textbf{Yes} \\
+\hline
+\textbf{Which of the following is your rank order (delete the ones that are not)} \\
+\begin{itemize}[leftmargin=1.4em, itemsep=0pt, topsep=0.2em]
+  \item Custom Proposal $>$ Machine Learning based data science $>$ Software Development $>$ Empirical AI Safety Research $>$ Digital Product Development with Berlin-Based University
+\end{itemize}
+\\[-0.8em]
+\hline
+\textbf{What are you submitting in this PDF?} (delete the ones that are not true for you) \\
+\begin{itemize}[leftmargin=1.4em, itemsep=0pt, topsep=0.2em]
+  \item Custom Proposal
+\end{itemize}
+\\[-0.8em]
+\hline
+\textbf{Put in the names of any tracks you are submitting work products for, or say ``none''} \\
+\begin{itemize}[leftmargin=1.4em, itemsep=0pt, topsep=0.2em]
+  \item None
+\end{itemize}
+\\[-0.8em]
+\hline
+\end{tabularx}
+
+\newpage
+
+% =========================
+% Proposal
+% =========================
+
+\tableofcontents
+\newpage
+
+\section{Pitch to a Broad \#Audience}
+
+My capstone is about detecting AI-generated images (and possibly short videos) in real conditions. The problem is simple: AI is being used heavily to create images and videos that are sometimes genuinely hard to tell from real ones. That becomes a real issue when content is used without consent, when people get tricked, or when fake media spreads fast online. Also, a lot of detectors look strong on clean benchmarks, but real media doesn’t stay clean --- it gets compressed, resized, cropped, reposted, and edited, and that’s where performance often falls apart.
+
+This capstone is built as \textbf{two connected parts}.
+
+\textbf{Part 1 is the machine learning pipeline.} I’ll curate and document a dataset of real and AI-generated media, clean it carefully, remove duplicates to avoid leakage, and design train/validation/test splits that actually test generalization. I’ll train and compare detection models (starting from strong pretrained vision backbones) and evaluate them under stress tests that mirror real use: JPEG recompression, resolution changes, cropping, blur/noise, and mild edits. I also want to test generalization to generators the model hasn’t seen, because that’s the real test of whether the approach is reliable.
+
+\textbf{Part 2 is the final tool.} The written report isn’t just “writing”; it’s where I lock in what the tool should do based on evidence: which model is best, what thresholds make sense, where it fails, and when it should say ``uncertain'' instead of guessing. Then I’ll implement a tool (“AI Shield”) that follows those findings: upload or batch scan media $\rightarrow$ output a score, confidence, and a short report that’s honest about limitations.
+
+\section{Introduction and Background (short)}
+
+The quality of generated media is improving quickly, and the practical problem isn’t “can we detect one specific generator,” but “can we detect generated media \emph{after} it’s been through the internet.” In real distribution, images are recompressed, resized, cropped, reposted, and lightly edited. A detector that only works on clean samples is not useful.
+
+Another issue is that detectors can learn shortcuts. If you train on a narrow dataset or a small set of generators, the model might pick up dataset fingerprints instead of stable signals. That leads to impressive scores on familiar data but poor generalization to new generators, new post-processing pipelines, or different sources of “real” images. So the core of my capstone is: (1) build the data and splits correctly (no leakage), (2) measure robustness under realistic perturbations, and (3) measure generalization on “unseen generator / unseen method” setups.
+
+I also want to be careful about false positives. If a system confidently labels real media as fake, that can cause harm. So the final design should include calibrated confidence and an “uncertain” output when the model is out of distribution.
+
+\section{Planned datasets and resources}
+
+I am intentionally starting image-first (video is a reach goal) so the project stays feasible in compute and storage.
+
+\subsection*{Generated image sources (core)}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{GenImage} (multi-generator generated image benchmark + paired real data): \href{https://github.com/GenImage-Dataset/GenImage}{github.com/GenImage-Dataset/GenImage}
+  \item \textbf{DiffusionDB} (large Stable Diffusion dataset; I will sample a manageable subset): \href{https://huggingface.co/datasets/poloclub/diffusiondb}{huggingface.co/datasets/poloclub/diffusiondb}
+  \item \textbf{Synthbuster} (diffusion detection dataset): \href{https://www.veraai.eu/posts/dataset-synthbuster-towards-detection-of-diffusion-model-generated-images}{veraai.eu Synthbuster post}
+\end{itemize}
+
+\subsection*{Real image sources (core)}
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{MS COCO} (real-world photos): \href{https://cocodataset.org/}{cocodataset.org}
+  \item \textbf{Open Images} (large-scale real photos; I will sample a subset): \href{https://storage.googleapis.com/openimages/web/index.html}{Open Images}
+\end{itemize}
+
+\subsection*{Video sources (reach goal)}
+If I extend to short videos, I’ll start with frame sampling + aggregation and keep the dataset size controlled.
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{DFDC (DeepFake Detection Challenge)}: \href{https://ai.facebook.com/datasets/dfdc/}{ai.facebook.com/datasets/dfdc/}
+  \item \textbf{FaceForensics++}: \href{https://github.com/ondyari/FaceForensics}{github.com/ondyari/FaceForensics}
+  \item \textbf{Celeb-DF (v2)}: \href{https://github.com/yuezunli/celeb-deepfakeforensics}{github.com/yuezunli/celeb-deepfakeforensics}
+  \item \textbf{DeeperForensics-1.0}: \href{https://github.com/EndlessSora/DeeperForensics-1.0}{github.com/EndlessSora/DeeperForensics-1.0}
+\end{itemize}
+
+\section{Feasibility Analysis}
+
+\subsection{This capstone project is big enough}
+This isn’t “train once, demo once.” The real work is building a trustworthy pipeline: dataset curation, cleaning and deduplication, split design, stress testing, generalization testing, and then model iteration based on what breaks. The final tool is the product of that evidence, not the starting point.
+
+\subsection{This capstone project is not too big}
+I’m scoping it so it doesn’t blow up. The MVP is image detection, because full video modeling can explode compute and storage. I will fine-tune pretrained backbones and spend effort where it matters: dataset quality, evaluation, and generalization under shift. Video stays optional.
+
+\subsection{Reach goals and fallback plans}
+\textbf{MVP:} image dataset + baseline + robustness curves + unseen-generator testing + calibrated/``uncertain'' policy + AI Shield tool that implements the final choices.
+
+\textbf{Reach goals:} short video support (frame sampling), stronger model variants, more stress tests.
+
+\textbf{Fallback:} if video is too heavy, I keep the project image-first and deepen generalization and robustness evaluation.
+
+\section{WBS (Work Breakdown Structure)}
+
+\subsection{Fall}
+
+\textbf{Weeks 1--2: lock the data and pipeline}
+\begin{itemize}[leftmargin=1.4em, itemsep=0pt]
+  \item Pick 1--2 sources for real images and 1--2 sources for generated images (so I’m not drowning in data).
+  \item Set up the repo + data layout (metadata format, labels, and a consistent preprocessing pipeline).
+  \item Write the scripts once: ingest $\rightarrow$ clean $\rightarrow$ dedupe $\rightarrow$ split.
+\end{itemize}
+
+\textbf{Weeks 3--4: make the dataset trustworthy}
+\begin{itemize}[leftmargin=1.4em, itemsep=0pt]
+  \item Verify splits and leakage prevention (near-duplicates don’t cross train/test).
+  \item Create a smaller ``sanity subset'' (e.g., 5--10k images) so iteration is fast.
+\end{itemize}
+
+\textbf{Weeks 4--6: baseline model}
+\begin{itemize}[leftmargin=1.4em, itemsep=0pt]
+  \item Train a baseline detector end-to-end.
+  \item Do quick error analysis: what fails first (compression, crops, specific categories)?
+\end{itemize}
+
+\textbf{Weeks 6--9: robustness tests (the core evidence)}
+\begin{itemize}[leftmargin=1.4em, itemsep=0pt]
+  \item Run stress tests: JPEG recompression sweep, resize/crop sweep, blur/noise, mild edits.
+  \item Produce robustness curves (performance vs. degradation), not one headline score.
+\end{itemize}
+
+\textbf{Weeks 8--12: generalization + iteration}
+\begin{itemize}[leftmargin=1.4em, itemsep=0pt]
+  \item Set up an ``unseen generator / unseen method'' evaluation.
+  \item Use failures to drive changes (augmentations, regularization, maybe a different backbone).
+\end{itemize}
+
+\subsection{Spring}
+
+\textbf{Weeks 1--4: final model + rules}
+\begin{itemize}[leftmargin=1.4em, itemsep=0pt]
+  \item Choose the final model based on robustness + generalization, not best clean score.
+  \item Decide thresholds and when the system should output ``uncertain''.
+\end{itemize}
+
+\textbf{Weeks 3--9: build AI Shield (the tool)}
+\begin{itemize}[leftmargin=1.4em, itemsep=0pt]
+  \item Package preprocessing + inference into a CLI and/or lightweight web UI.
+  \item Output: score, confidence, and a short report that matches what the experiments actually proved.
+\end{itemize}
+
+\textbf{Weeks 6--10: optional upgrades}
+\begin{itemize}[leftmargin=1.4em, itemsep=0pt]
+  \item If MVP is solid: add short video support (frame sampling + aggregation) or expand stress tests.
+\end{itemize}
+
+\textbf{Weeks 9--12: final report + reproducibility}
+\begin{itemize}[leftmargin=1.4em, itemsep=0pt]
+  \item Clean write-up, reproducible runs, and a demo that shows the tool doing what the report claims.
+\end{itemize}
+
+\section{Completed Work Products (so far)}
+As of this proposal submission, I have:
+\begin{itemize}[leftmargin=1.4em, itemsep=0pt]
+  \item A draft plan for dataset sources (real + generated), starting image-first.
+  \item A draft metadata schema and split strategy (including an ``unseen generator'' evaluation).
+  \item An initial repo structure plan for pipeline / training / evaluation / tool packaging.
+\end{itemize}
+
+\section*{Appendix (Optional): Sources of support, advice, and feedback}
+\addcontentsline{toc}{section}{Appendix (Optional): Sources of support, advice, and feedback}
+
+\begin{itemize}[leftmargin=1.4em, itemsep=0pt]
+  \item I discussed this capstone direction and scope with Prof. Watson and will keep seeking early feedback on feasibility and evaluation design.
+\end{itemize}
+
+\end{document}
